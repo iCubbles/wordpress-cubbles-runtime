@@ -6,7 +6,7 @@ This is a small Wordpress plugin which adds Cubbles support to your wordpress in
 3. Adjust allowedposttags to enable admin user to use custom tags in post html editor
 
 #Usage
-Just copy the folder `cubbles-runtime` into your `wp-content/plugins` folder and active plugin using admin panel. If you create a new blog post just switch to raw html editor and paste
+Just copy the folder `cubbles-runtime` into your `wp-content/plugins` folder and activate plugin using admin panel. If you create a new blog post just switch to raw html editor and paste
     <div cubx-core-crc>
         <travel-planner cubx-dependency="https://cubbles.world/sandbox/com.incowia.demo.travel-planner@0.1.0-SNAPSHOT/travel-planner/main"></travel-planner>
     </div>
