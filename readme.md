@@ -1,6 +1,7 @@
 #cubbles-runtime
 
 This is a small Wordpress plugin which adds Cubbles support to your wordpress instance. Basically it does 3 things right now:
+
 1. Add webcomponents-lite.js from cubbles.world sandbox store
 2. Add cubbles clien runtime extension (CRE) from cubbles.world sandbox store
 3. Adjust allowedposttags to enable admin user to use custom tags in post html editor
