@@ -1,4 +1,4 @@
-#cubbles_runtime
+#cubbles-runtime
 
 This is a small Wordpress plugin which adds Cubbles to your wordpress page. Basically it does 3 things right now:
 1. Add webcomponents-lite.js from cubbles.world sandbox store
