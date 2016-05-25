@@ -46,12 +46,14 @@ class CubxRuntime {
   }
 
   private static function _getAllowedTagsFromDB() {
-    // for now just return the static default allowedTags
-    return self::$allowedTags;
+    $options = get_option(self::$optionsKey);
+    return $options['allowedTags'];
   }
 
-  private static function _writeAllowdTagsToDB() {
-
+  private static function _writeAllowdTagsToDB($allowedTags) {
+    $options = get_option(self::$optionsKey);
+    $options['allowedTags'] = $allowedTags;
+    update_option(self::$optionsKey, $options);
   }
 
   // merge all allowed cubble tags into global $allowedposttags array
@@ -67,7 +69,6 @@ class CubxRuntime {
 
   static function filterTinyMceBeforeInit($options) {
     $opts = '*[*]';
-    $options['valid_elements'] = $opts;
     $options['extended_valid_elements'] = $opts;
     return $options;
   }
@@ -99,13 +100,14 @@ class CubxRuntime {
   static function onActivate() {
     //check if there is already an option entry
     $options = get_option(self::$optionsKey);
-    if (!is_null($optionsKey)) {
+    if (!is_null($options)) {
       // write default options into database
       $options = array();
       $options['allowedAttrs'] = self::$allowedAttrs;
       $options['allowedTags'] = self::$allowedTags;
       $options['remoteStoreUrl'] = self::$remoteStoreUrl;
       $options['rteWebpackage'] = self::$rteWebpackage;
+      add_option(self::$optionsKey, $options);
     }
   }
 
@@ -129,6 +131,11 @@ class CubxRuntime {
     register_uninstall_hook(__FILE__, array('CubxRuntime', 'onUninstall'));
   }
 }
+
+// add_action('activated_plugin','save_error');
+// function save_error(){
+//     update_option('cubx_plugin_error',  ob_get_contents());
+// }
 
 CubxRuntime::registerActivationHook();
 CubxRuntime::registerDeactivationHook();
