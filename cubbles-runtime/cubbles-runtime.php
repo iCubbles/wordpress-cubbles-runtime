@@ -12,6 +12,9 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 class CubxRuntime {
 
+  // attribute used for making an html tag a client runtime container
+  private static $cubxCoreCrcAttr = 'cubx-core-crc';
+
   // useds to store options into wordpress database using it's option API
   private static $optionsKey = 'cubx_runtime_options';
 
@@ -68,8 +71,16 @@ class CubxRuntime {
   }
 
   static function filterTinyMceBeforeInit($options) {
-    $opts = '*[*]';
-    $options['extended_valid_elements'] = $opts;
+    $allowedTags = array_keys(self::_getAllowedTagsFromDB());
+    $allowedAttrs = array_keys(self::$allowedAttrs);
+
+    $validElements = '@[' . implode('|', $allowedAttrs) . ']';
+    $validElements = $validElements . ',' . implode(',', $allowedTags);
+    $options['valid_elements'] = $validElements;
+
+    $extendedValidElements = 'div[align|class|dir|lang|style|' . self::$cubxCoreCrcAttr.']';
+    $options['extended_valid_elements'] = $extendedValidElements;
+
     return $options;
   }
 
@@ -90,10 +101,13 @@ class CubxRuntime {
   static function init() {
     // this adds capability to use cubbles also for users with roles 'Author' and 'Contributor' (which do not have the permission 'unfiltered_html')
     // For more info see: https://codex.wordpress.org/Roles_and_Capabilities#unfiltered_html
+    // for user which already have 'unfiltered_html' permission the following two lines do not have any effect
     add_action('init', array('CubxRuntime', 'addAllowedCustomTags'));
-
     add_filter('tiny_mce_before_init', array('CubxRuntime', 'filterTinyMceBeforeInit'));
+
+    // adding the needed cubbles platform scripts
     add_action('wp_enqueue_scripts', array('CubxRuntime', 'addRuntime'));
+    // add cif init attribute to crc loader script tag
     add_filter('clean_url', array('CubxRuntime', 'addCifScriptAttr'), 10, 1);
   }
 
