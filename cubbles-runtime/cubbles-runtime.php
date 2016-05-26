@@ -12,6 +12,10 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 class CubxRuntime {
 
+  // this is the placeholder used to replace dash custom elements tag name during transformation of html
+  // see transformCustomTags()
+  private static $placeholderDash = '0000';
+
   // attribute used for making an html tag a client runtime container
   private static $cubxCoreCrcAttr = 'cubx-core-crc';
 
@@ -29,7 +33,9 @@ class CubxRuntime {
   private static $allowedTags = array(
     'pie-chart' => array(),
     'travel-planner' => array(),
-    'co2-footprint' => array()
+    'co2-footprint' => array(),
+    'myelement' => array(),
+    'my-element' => array()
   );
 
   // default remote storeUrl to be used
@@ -49,8 +55,9 @@ class CubxRuntime {
   }
 
   private static function _getAllowedTagsFromDB() {
-    $options = get_option(self::$optionsKey);
-    return $options['allowedTags'];
+    // $options = get_option(self::$optionsKey);
+    // return $options['allowedTags'];
+    return self::$allowedTags;
   }
 
   private static function _writeAllowdTagsToDB($allowedTags) {
@@ -62,23 +69,72 @@ class CubxRuntime {
   // merge all allowed cubble tags into global $allowedposttags array
   static function addAllowedCustomTags() {
     global $allowedposttags;
-    $allowedTags = self::_getAllowedTagsFromDB();
-    foreach ($allowedTags as &$tag) {
+    $cubxAllowedTags = self::_getAllowedTagsFromDB();
+    foreach ($cubxAllowedTags as &$tag) {
       $tag = self::$allowedAttrs;
     }
     unset($tag);
-    $allowedposttags = array_merge($allowedposttags, $allowedTags);
+    $allowedposttags = array_merge($allowedposttags, $cubxAllowedTags);
+  }
+
+  static function returnAllowedCustomTags($allowedTags, $context) {
+    $cubxAllowedTags = array_keys(self::_getAllowedTagsFromDB());
+    foreach ($cubxAllowedTags as $tag) {
+      $tagNameEscaped =  str_ireplace('-', self::$placeholderDash, $tag);
+      $allowedTags[$tagNameEscaped] = self::$allowedAttrs;
+    }
+
+    return $allowedTags;
+  }
+
+  static function transformCustomTags($html) {
+    $customTags = array_keys(self::_getAllowedTagsFromDB());
+
+    // iterate over all allowed cubbles custom tags and replace them so they won't get stripped out by kses filter
+    foreach ($customTags as $tag) {
+      // transform each tag name replacing dash with defined self::$placeholderDash
+      // e.g. <my-element ...> will be replaced with <my000element ...>
+      // with that we can pevent kses from stripping them out
+      $pattern = '<' . $tag;
+      $replace = '<' . str_ireplace('-', self::$placeholderDash, $tag);
+      $html = str_ireplace($pattern, $replace, $html);
+
+      // replace all closing tags analog to opening tags above
+      $pattern = '</' . $tag;
+      $replace = '</' . str_ireplace('-', self::$placeholderDash, $tag);
+      $html = str_ireplace($pattern, $replace, $html);
+    }
+
+    return $html;
+  }
+
+  static function retransformCustomTags($html) {
+    $customTags = array_keys(self::_getAllowedTagsFromDB());
+
+    // iterate over all allowed tags and reverse transformation to get the dash again in tag names
+    foreach ($customTags as $tag) {
+      // e.g. <my0000element ...> will be replaced with <my-element" ...>
+      $pattern = '<' . str_ireplace('-', self::$placeholderDash, $tag);
+      $replace = '<' . $tag;
+      $html = str_ireplace($pattern, $replace, $html);
+
+      // replace all closing tags analog to opening tags above
+      $pattern = '</' . str_ireplace('-', self::$placeholderDash, $tag);
+      $replace = '</' . $tag;
+      $html = str_ireplace($pattern, $replace, $html);
+    }
+
+    return $html;
   }
 
   static function filterTinyMceBeforeInit($options) {
     $allowedTags = array_keys(self::_getAllowedTagsFromDB());
     $allowedAttrs = array_keys(self::$allowedAttrs);
 
-    $validElements = '@[' . implode('|', $allowedAttrs) . ']';
-    $validElements = $validElements . ',' . implode(',', $allowedTags);
-    $options['valid_elements'] = $validElements;
+    $extendedValidElements = '@[' . implode('|', $allowedAttrs) . ']';
+    $extendedValidElements = $extendedValidElements . ',' . implode(',', $allowedTags);
+    $extendedValidElements = $extendedValidElements . ',div[align|class|dir|lang|style|xml::lang|' . self::$cubxCoreCrcAttr.']';
 
-    $extendedValidElements = 'div[align|class|dir|lang|style|' . self::$cubxCoreCrcAttr.']';
     $options['extended_valid_elements'] = $extendedValidElements;
 
     return $options;
@@ -101,9 +157,13 @@ class CubxRuntime {
   static function init() {
     // this adds capability to use cubbles also for users with roles 'Author' and 'Contributor' (which do not have the permission 'unfiltered_html')
     // For more info see: https://codex.wordpress.org/Roles_and_Capabilities#unfiltered_html
-    // for user which already have 'unfiltered_html' permission the following two lines do not have any effect
-    add_action('init', array('CubxRuntime', 'addAllowedCustomTags'));
+    // add_action('init', array('CubxRuntime', 'addAllowedCustomTags'));
+    add_filter('wp_kses_allowed_html', array('CubxRuntime', 'returnAllowedCustomTags'), 10, 2);
     add_filter('tiny_mce_before_init', array('CubxRuntime', 'filterTinyMceBeforeInit'));
+    // use this filter to replace all custom tags with dashes before kses filter is applied
+    add_filter('content_save_pre', array('CubxRuntime', 'transformCustomTags'), 9);
+    // use this to retransform filtered html before saving
+    add_filter('content_save_pre', array('CubxRuntime', 'retransformCustomTags'), 11);
 
     // adding the needed cubbles platform scripts
     add_action('wp_enqueue_scripts', array('CubxRuntime', 'addRuntime'));
