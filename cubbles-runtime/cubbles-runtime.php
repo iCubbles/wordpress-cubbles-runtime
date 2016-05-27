@@ -63,17 +63,6 @@ class CubxRuntime {
     update_option(self::$optionsKey, $options);
   }
 
-  // merge all allowed cubble tags into global $allowedposttags array
-  static function addAllowedCustomTags() {
-    global $allowedposttags;
-    $cubxAllowedTags = self::_getAllowedTagsFromDB();
-    foreach ($cubxAllowedTags as &$tag) {
-      $tag = self::$allowedAttrs;
-    }
-    unset($tag);
-    $allowedposttags = array_merge($allowedposttags, $cubxAllowedTags);
-  }
-
   static function returnAllowedCustomTags($allowedTags, $context) {
     $cubxAllowedTags = array_keys(self::_getAllowedTagsFromDB());
     foreach ($cubxAllowedTags as $tag) {
@@ -158,7 +147,6 @@ class CubxRuntime {
   static function init() {
     // this adds capability to use cubbles also for users with roles 'Author' and 'Contributor' (which do not have the permission 'unfiltered_html')
     // For more info see: https://codex.wordpress.org/Roles_and_Capabilities#unfiltered_html
-    // add_action('init', array('CubxRuntime', 'addAllowedCustomTags'));
     add_filter('wp_kses_allowed_html', array('CubxRuntime', 'returnAllowedCustomTags'), 10, 2);
     add_filter('tiny_mce_before_init', array('CubxRuntime', 'filterTinyMceBeforeInit'));
     // use this filter to replace all custom tags with dashes before kses filter is applied
