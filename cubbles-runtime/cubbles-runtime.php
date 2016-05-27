@@ -33,9 +33,7 @@ class CubxRuntime {
   private static $allowedTags = array(
     'pie-chart' => array(),
     'travel-planner' => array(),
-    'co2-footprint' => array(),
-    'myelement' => array(),
-    'my-element' => array()
+    'co2-footprint' => array()
   );
 
   // default remote storeUrl to be used
@@ -55,9 +53,8 @@ class CubxRuntime {
   }
 
   private static function _getAllowedTagsFromDB() {
-    // $options = get_option(self::$optionsKey);
-    // return $options['allowedTags'];
-    return self::$allowedTags;
+    $options = get_option(self::$optionsKey);
+    return $options['allowedTags'];
   }
 
   private static function _writeAllowdTagsToDB($allowedTags) {
@@ -133,7 +130,7 @@ class CubxRuntime {
 
     $extendedValidElements = '@[' . implode('|', $allowedAttrs) . ']';
     $extendedValidElements = $extendedValidElements . ',' . implode(',', $allowedTags);
-    $extendedValidElements = $extendedValidElements . ',div[align|class|dir|lang|style|xml::lang|' . self::$cubxCoreCrcAttr.']';
+    // $extendedValidElements = $extendedValidElements . ',div[align|class|dir|lang|style|xml::lang|' . self::$cubxCoreCrcAttr.']';
 
     $options['extended_valid_elements'] = $extendedValidElements;
 
@@ -154,6 +151,10 @@ class CubxRuntime {
     }
   }
 
+  static function wrapContent($content) {
+     return '<div ' . self::$cubxCoreCrcAttr . '>' . $content . '</div>';
+  }
+
   static function init() {
     // this adds capability to use cubbles also for users with roles 'Author' and 'Contributor' (which do not have the permission 'unfiltered_html')
     // For more info see: https://codex.wordpress.org/Roles_and_Capabilities#unfiltered_html
@@ -169,6 +170,8 @@ class CubxRuntime {
     add_action('wp_enqueue_scripts', array('CubxRuntime', 'addRuntime'));
     // add cif init attribute to crc loader script tag
     add_filter('clean_url', array('CubxRuntime', 'addCifScriptAttr'), 10, 1);
+    // make the content get wrapped by a client runtime container  (<div cubx-core-crc>[the content]</div>)
+    add_filter('the_content', array('CubxRuntime', 'wrapContent'));
   }
 
   static function onActivate() {
