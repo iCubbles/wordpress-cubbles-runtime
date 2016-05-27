@@ -10,6 +10,9 @@ License: GPL
 */
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+// include admin.php which contains admin menu stuff
+require_once(plugin_dir_path(__FILE__) . '/CubxAdminMenu.php');
+
 class CubxRuntime {
 
   // this is the placeholder used to replace dash custom elements tag name during transformation of html
@@ -39,7 +42,7 @@ class CubxRuntime {
   // default remote storeUrl to be used
   private static $remoteStoreUrl = 'https://cubbles.world/sandbox';
   // default rte to be used
-  private static $rteWebpackage = 'cubx.core.rte@1.8.0';
+  private static $rteWebpackage = 'cubx.core.rte@1.9.0-SNAPSHOT';
 
   private static $scripts = array(
     'webcomponents-lite' => 'webcomponents/webcomponents-lite.js',
@@ -144,6 +147,16 @@ class CubxRuntime {
      return '<div ' . self::$cubxCoreCrcAttr . '>' . $content . '</div>';
   }
 
+  static function addAdminMenu() {
+    $values = array(
+      'remoteStoreUrl' => self::$remoteStoreUrl,
+      'rteWebpackage' => self::$rteWebpackage,
+      'allowedTags' => array_keys(self::_getAllowedTagsFromDB())
+    );
+    // init new instance of CubixAdminMenu class
+    new CubxAdminMenu($values);
+  }
+
   static function init() {
     // this adds capability to use cubbles also for users with roles 'Author' and 'Contributor' (which do not have the permission 'unfiltered_html')
     // For more info see: https://codex.wordpress.org/Roles_and_Capabilities#unfiltered_html
@@ -160,6 +173,9 @@ class CubxRuntime {
     add_filter('clean_url', array('CubxRuntime', 'addCifScriptAttr'), 10, 1);
     // make the content get wrapped by a client runtime container  (<div cubx-core-crc>[the content]</div>)
     add_filter('the_content', array('CubxRuntime', 'wrapContent'));
+
+    // add admin menu
+    add_action('admin_menu', array('CubxRuntime', 'addAdminMenu'));
   }
 
   static function onActivate() {
