@@ -51,13 +51,23 @@ class CubxRuntime {
 
   // get full script url by name
   private static function _getScripts($name) {
-    $script = self::$remoteStoreUrl . '/' . self::$rteWebpackage . '/' . self::$scripts[$name];
+    $script = self::_getRemoteStoreUrlFromDB() . '/' . self::_getRteWebpackageFromDB() . '/' . self::$scripts[$name];
     return $script;
   }
 
   private static function _getAllowedTagsFromDB() {
     $options = get_option(self::$optionsKey);
     return $options['allowedTags'];
+  }
+
+  private static function _getRemoteStoreUrlFromDB() {
+    $options = get_option(self::$optionsKey);
+    return $options['remoteStoreUrl'];
+  }
+
+  private static function _getRteWebpackageFromDB() {
+    $options = get_option(self::$optionsKey);
+    return $options['rteWebpackage'];
   }
 
   private static function _writeAllowdTagsToDB($allowedTags) {
@@ -149,12 +159,21 @@ class CubxRuntime {
 
   static function addAdminMenu() {
     $values = array(
-      'remoteStoreUrl' => self::$remoteStoreUrl,
-      'rteWebpackage' => self::$rteWebpackage,
-      'allowedTags' => array_keys(self::_getAllowedTagsFromDB())
+      'remoteStoreUrl' => self::_getRemoteStoreUrlFromDB(),
+      'rteWebpackage' => self::_getRteWebpackageFromDB(),
+      'allowedTags' => implode(',', array_keys(self::_getAllowedTagsFromDB()))
     );
     // init new instance of CubixAdminMenu class
     new CubxAdminMenu($values);
+  }
+
+  static function saveSettings($options) {
+    $allowedTags = $options['allowedTags'];
+    $options['allowedTags'] = array();
+    foreach ($allowedTags as $tag) {
+      $options['allowedTags'][$tag] = array();
+    }
+    update_option(self::$optionsKey, $options);
   }
 
   static function init() {
@@ -184,7 +203,6 @@ class CubxRuntime {
     if (!is_null($options)) {
       // write default options into database
       $options = array();
-      $options['allowedAttrs'] = self::$allowedAttrs;
       $options['allowedTags'] = self::$allowedTags;
       $options['remoteStoreUrl'] = self::$remoteStoreUrl;
       $options['rteWebpackage'] = self::$rteWebpackage;
