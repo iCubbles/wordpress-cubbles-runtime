@@ -6,3 +6,5 @@ wp-config.php
 
 /readme.html
 /license.txt
+
+docker/wordpress/access.txt
