@@ -1,23 +1,23 @@
-#cubbles-runtime
+# cubbles-runtime
 
-This is a small Wordpress plugin which adds Cubbles support to your wordpress instance. Basically it does 3 things right now:
+This is a small Wordpress plugin which adds Cubbles support to your wordpress instance.
 
-1. Add webcomponents-lite.js from cubbles.world sandbox store
-2. Add cubbles client runtime extension (CRE) from cubbles.world sandbox store
-3. Adjust allowedposttags to enable admin user to use custom tags in post html editor
+# Usage
+Just copy the folder `cubbles-runtime` into your `wp-content/plugins` folder and activate plugin using admin panel. If you create a new blog post or page just switch to raw html editor and paste
 
-#Usage
-Just copy the folder `cubbles-runtime` into your `wp-content/plugins` folder and activate plugin using admin panel. If you create a new blog post just switch to raw html editor and paste
-
-    <div cubx-core-crc>
-        <travel-planner cubx-dependency="https://cubbles.world/sandbox/com.incowia.demo.travel-planner@0.1.0-SNAPSHOT/travel-planner/main"></travel-planner>
-    </div>
+    <travel-planner cubx-dependency="com.incowia.demo.travel-planner@0.1.0-SNAPSHOT/travel-planner/main"></travel-planner>
 
 This includes the `travel-planner` demo into your blog post.
 
-#Restrictions
+## Options
+All users who have the capability `manage_options` are allowed to change the configuration of the plugin. You can find plugin settings as ab submenu of the standard wordress settings. Look for `Cubbles` inside the submenu.
+Currently there are three settings available:
 
-Currently the plugin is still under development and does only support the CRE version 1.8.0-SNAPSHOT from https://cubbles.world/sandbox store.
-Also only the custom tag `<travel-planner>` is supported (see https://github.com/iCubbles/demo.travel-planner).
+1. **Remote Store Url**: Add the url of the store from which you would like the get the Cubbles Runtime and the cubbles coponents itself. *(e.g. `https://cubbles.world/sandbox`)*
+2. **CRE Webpackage**: Define wich version of CRE (**C**lient **R**untime **E**xtension) you would like to use. You have to specify the complete Webpackage name. *Note:* This has to be at least version `1.9.0-SNAPSHOT` *(e.g. `cubx.core.rte@1.9.0`)*
+3. **Allowed Cubbles Components**: Configure a list of cubbles components which users can use even if they don't have the capability `unfiltered_html`.
+
+# Restrictions
+
 
 [Want to get to know the Cubbles Platform?](https://cubbles.github.io)
