@@ -131,10 +131,13 @@ class CubxRuntime {
     $allowedAttrs = array_keys(self::$allowedAttrs);
 
     $extendedValidElements = '@[' . implode('|', $allowedAttrs) . ']';
-    $extendedValidElements = $extendedValidElements . ',' . implode(',', $allowedTags);
+    $extendedValidElements = $extendedValidElements . ',' . implode(',' , $allowedTags);
     // $extendedValidElements = $extendedValidElements . ',div[align|class|dir|lang|style|xml::lang|' . self::$cubxCoreCrcAttr.']';
 
+    $customElements = implode(',', $allowedTags);
+
     $options['extended_valid_elements'] = $extendedValidElements;
+    $options['custom_elements'] = $customElements;
 
     return $options;
   }
