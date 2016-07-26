@@ -9,3 +9,8 @@ ENV WORDPRESS_PASSWORD="cubxAdmin"
 ENV WORDPRESS_DB_NAME="cubbles"
 
 VOLUME ["/var/www/html/wp-content/plugins/cubbles-runtime"]
+
+# provide entrypoint
+COPY ./docker-entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["apache2-foreground"]

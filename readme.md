@@ -18,3 +18,8 @@ Currently there are three settings available:
 1. **Remote Store Url**: Add the url of the store from which you would like the get the Cubbles Runtime and the cubbles coponents itself. *(e.g. `https://cubbles.world/sandbox`)*
 2. **CRE Webpackage**: Define wich version of CRE (**C**lient **R**untime **E**xtension) you would like to use. You have to specify the complete Webpackage name. *Note:* This has to be at least version `1.9.0-SNAPSHOT` *(e.g. `cubx.core.rte@1.9.0`)*
 3. **Allowed Cubbles Components**: Configure a list of cubbles components which users can use even if they don't have the capability `unfiltered_html`.
+
+## Known Issues
+
+1. Wordpress Editor: CustomTags are shown in `[TextView]` only.
+2. Wordpress Editor: An empty line before a CustomTag lets the editor remove the CustomTag completely when switching between `[VisualView]` and `[TextView]`  
